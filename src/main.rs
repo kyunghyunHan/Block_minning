@@ -18,11 +18,13 @@ use tokio::{
     sync::mpsc,
     time::sleep,
 };
-
-const DIFFICULTY_PREFIX: &str = "00";
+//채굴 계획의 기초
+//기본적으로 블록을 마이닝할 때 마이닝하는 사람은 블록에 대한 데이터를 해시해야 하고(이 경우 SHA256 사용) 해시를 찾아야 합니다.
+//이 해시는 바이너리에서 00(2개의 0)으로 시작합니다. 이것은 또한 네트워크에서 우리의 "어려움"을 나타냅니다.
+const DIFFICULTY_PREFIX: &str = "0000";
 
 mod p2p;
-
+//블록체인의 데이터 구조
 pub struct App {
     pub blocks: Vec<Block>,
 }
@@ -100,7 +102,8 @@ impl App {
     fn new() -> Self {
         Self { blocks: vec![] }
     }
-
+    //제네시스 블록으로 애플리케이션을 초기화
+    //제네시스 방법은 블록체인에서 하드코딩으로 생성된 블록
     fn genesis(&mut self) {
         let genesis_block = Block {
             id: 0,
@@ -112,9 +115,11 @@ impl App {
         };
         self.blocks.push(genesis_block);
     }
-
+    //체인에 새로운 블록을 추가할수 있는
+    //previous block을 가져온 다음 블록이 유요한지 검사
     fn try_add_block(&mut self, block: Block) {
         let latest_block = self.blocks.last().expect("there is at least one block");
+        //is_block_valid
         if self.is_block_valid(&block, latest_block) {
             self.blocks.push(block);
         } else {
